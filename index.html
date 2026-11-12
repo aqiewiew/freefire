@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b52">
+  <meta name="description" content="Pencatatan keuangan pribadi berbasis cloud.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <title>FF Money Tracker</title>
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <main id="auth-view" class="auth-shell">
+    <section class="auth-card">
+      <div class="brand-mark">FM</div>
+      <p class="eyebrow">PERSONAL FINANCE CLOUD</p>
+      <h1>FF Money Tracker</h1>
+      <p class="muted">Catat transaksi, pantau saldo, dan akses dari perangkatmu.</p>
+      <form id="auth-form" class="stack">
+        <label>Email<input id="email" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
+        <label>Password<input id="password" type="password" autocomplete="current-password" minlength="8" required placeholder="Minimal 8 karakter"></label>
+        <div class="button-row">
+          <button class="btn primary" type="submit" id="login-btn">Masuk</button>
+          <button class="btn secondary" type="button" id="signup-btn">Buat akun</button>
+        </div>
+      </form>
+      <p class="tiny muted">Gunakan akun yang sama di laptop dan HP. Jangan bagikan password atau PIN.</p>
+    </section>
+  </main>
+
+  <main id="app-view" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="brand-line"><span class="brand-mark small">FM</span><div><b>FF Money Tracker</b><small>Cloud Edition</small></div></div>
+      <nav class="nav">
+        <button class="nav-link active" data-page="dashboard">▦ <span>Dashboard</span></button>
+        <button class="nav-link" data-page="transactions">↕ <span>Transaksi</span></button>
+        <button class="nav-link" data-page="tournaments">🏆 <span>Tournament / FT</span></button>
+        <button class="nav-link" data-page="matches">◎ <span>Catatan Laga</span></button>
+        <button class="nav-link" data-page="reports">▤ <span>Laporan</span></button>
+        <button class="nav-link" data-page="settings">⚙ <span>Pengaturan</span></button>
+      </nav>
+      <div class="sidebar-bottom"><span id="user-email" class="tiny muted"></span><button id="logout-btn" class="btn ghost full">Keluar akun</button></div>
+    </aside>
+
+    <section class="content">
+      <header class="topbar">
+        <div><p class="eyebrow" id="page-eyebrow">RINGKASAN</p><h2 id="page-title">Dashboard</h2></div>
+        <div class="top-actions"><span class="cloud-status"><i></i> Cloud aktif</span><button id="mobile-logout" class="btn ghost">Keluar</button></div>
+      </header>
+
+      <section id="page-dashboard" class="page">
+        <div class="welcome-row"><div><h3>Ringkasan keuangan</h3><p class="muted">Pantau pergerakan uangmu secara berkala.</p></div><button class="btn primary" data-go="transactions">+ Catat transaksi</button></div>
+        <div class="stats-grid">
+          <article class="stat-card balance"><span>Total saldo tercatat</span><strong id="total-balance">Rp0</strong><small>Saldo awal + transaksi aktual</small></article>
+          <article class="stat-card"><span>Total pemasukan</span><strong id="total-income">Rp0</strong><small>Akumulasi pemasukan</small></article>
+          <article class="stat-card"><span>Total pengeluaran</span><strong id="total-expense">Rp0</strong><small>Akumulasi pengeluaran</small></article>
+          <article class="stat-card"><span>Jumlah transaksi</span><strong id="total-count">0</strong><small>Semua kategori</small></article>
+        </div>
+        <div class="panel"><div class="panel-head"><div><h3>Transaksi terbaru</h3><p class="muted">Catatan uang masuk dan keluar</p></div><button class="btn secondary" data-go="transactions">Lihat semua</button></div><div id="recent-list" class="table-wrap"></div></div>
+      </section>
+
+      <section id="page-transactions" class="page hidden">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Tambah transaksi</h3><p class="muted">Masukkan uang yang benar-benar diterima atau dikeluarkan.</p></div></div>
+          <form id="transaction-form" class="form-grid">
+            <label>Jenis<select id="tx-type"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></label>
+            <label>Nominal (Rp)<input id="tx-amount" type="number" min="1" step="1" required placeholder="Contoh: 25000"></label>
+            <label>Kategori<select id="tx-category"><option>Umum</option><option>Top up</option><option>Hadiah turnamen diterima</option><option>Biaya turnamen</option><option>Transportasi</option><option>Konsumsi</option><option>Dukungan teman</option><option>Biaya aktual</option><option>Lainnya</option></select></label>
+            <label>Tanggal<input id="tx-date" type="date" required></label>
+            <label class="wide">Catatan<input id="tx-note" maxlength="180" placeholder="Keterangan transaksi"></label>
+            <label class="wide">Foto bukti (opsional)<input id="tx-receipt" type="file" accept="image/*"></label>
+            <div class="wide"><button class="btn primary" type="submit">Simpan transaksi</button></div>
+          </form>
+        </div>
+        <div class="panel"><div class="panel-head"><div><h3>Riwayat transaksi</h3><p class="muted">Data tersimpan di cloud akunmu.</p></div><input id="tx-search" class="search" placeholder="Cari catatan..."></div><div id="transaction-list" class="table-wrap"></div></div>
+      </section>
+
+      <section id="page-tournaments" class="page hidden">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Catat tournament / Fast Tour</h3><p class="muted">Catat biaya masuk dan hadiah yang benar-benar diterima.</p></div></div>
+          <form id="tournament-form" class="form-grid">
+            <label>Nama turnamen<input id="tour-name" required maxlength="100" placeholder="Nama penyelenggara / turnamen"></label>
+            <label>Tanggal<input id="tour-date" type="date" required></label>
+            <label>Biaya pendaftaran (Rp)<input id="tour-fee" type="number" min="0" step="1" value="0" required></label>
+            <label>Hadiah diterima (Rp)<input id="tour-prize" type="number" min="0" step="1" value="0" required></label>
+            <label>Hasil<select id="tour-result"><option value="pending">Belum selesai</option><option value="win">Menang</option><option value="lose">Kalah</option><option value="draw">Seri</option></select></label>
+            <label>Catatan<input id="tour-note" maxlength="180" placeholder="Catatan tambahan"></label>
+            <div class="wide"><button class="btn primary" type="submit">Simpan catatan turnamen</button></div>
+          </form>
+        </div>
+        <div class="panel"><h3>Riwayat turnamen</h3><div id="tournament-list" class="table-wrap"></div></div>
+      </section>
+
+      <section id="page-matches" class="page hidden">
+        <div class="notice"><b>Catatan Laga</b><p>Halaman ini untuk dokumentasi pertandingan dan pencatatan arus uang aktual, seperti pengeluaran dukungan atau pemasukan yang benar-benar diterima. Tidak ada kalkulasi taruhan atau hasil uang otomatis berdasarkan menang/kalah.</p></div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Tambah catatan pertandingan</h3><p class="muted">Simpan informasi pertandingan dan transaksi aktual secara terpisah.</p></div></div>
+          <form id="match-form" class="form-grid">
+            <label>Nama teman / pemain<input id="match-player" maxlength="100" required placeholder="Nama pemain"></label>
+            <label>Nama lawan / keterangan<input id="match-opponent" maxlength="100" placeholder="Nama lawan atau keterangan"></label>
+            <label>Tanggal<input id="match-date" type="date" required></label>
+            <label>Hasil pertandingan<select id="match-result"><option value="pending">Belum diketahui</option><option value="win">Menang</option><option value="lose">Kalah</option><option value="draw">Seri</option></select></label>
+            <label>Pengeluaran aktual (Rp)<input id="match-expense" type="number" min="0" step="1" value="0"></label>
+            <label>Catatan<input id="match-note" maxlength="180" placeholder="Catatan pertandingan"></label>
+            <div class="wide"><label class="check"><input id="match-add-expense" type="checkbox" checked> Catat nominal pengeluaran sebagai transaksi keuangan</label></div>
+            <div class="wide"><button class="btn primary" type="submit">Simpan catatan laga</button></div>
+          </form>
+        </div>
+        <div class="panel"><h3>Riwayat laga</h3><div id="match-list" class="table-wrap"></div></div>
+      </section>
+
+      <section id="page-reports" class="page hidden">
+        <div class="stats-grid">
+          <article class="stat-card"><span>Pemasukan bulan ini</span><strong id="month-income">Rp0</strong></article>
+          <article class="stat-card"><span>Pengeluaran bulan ini</span><strong id="month-expense">Rp0</strong></article>
+          <article class="stat-card"><span>Selisih bulan ini</span><strong id="month-net">Rp0</strong></article>
+        </div>
+        <div class="panel"><div class="panel-head"><div><h3>Ekspor data</h3><p class="muted">Unduh salinan catatan untuk arsip pribadi.</p></div></div><button id="export-json" class="btn secondary">Unduh backup JSON</button></div>
+      </section>
+
+      <section id="page-settings" class="page hidden">
+        <div class="panel">
+          <h3>Pengaturan akun</h3><p class="muted">Akun Supabase adalah identitas utama untuk sinkronisasi perangkat.</p>
+          <form id="pin-form" class="form-grid">
+            <label>PIN aplikasi baru (8 digit)<input id="pin-new" inputmode="numeric" pattern="[0-9]{8}" minlength="8" maxlength="8" placeholder="8 angka"></label>
+            <label>Ulangi PIN<input id="pin-confirm" inputmode="numeric" pattern="[0-9]{8}" minlength="8" maxlength="8" placeholder="Ulangi PIN"></label>
+            <div class="wide"><button class="btn primary" type="submit">Simpan PIN aplikasi</button></div>
+          </form>
+          <p class="tiny muted">PIN adalah kunci praktis tambahan, bukan pengganti password akun. Jangan gunakan PIN yang sama dengan PIN DANA, ATM, atau akun penting lainnya.</p>
+        </div>
+        <div class="panel"><h3>Keamanan & perangkat</h3><ul class="plain-list"><li>Data transaksi dipisahkan berdasarkan akun.</li><li>Foto bukti berada di bucket privat.</li><li>Gunakan tombol keluar jika memakai perangkat bersama.</li><li>Aktifkan kunci layar pada HP dan laptop.</li></ul></div>
+      </section>
+      <footer class="footer">FF Money Tracker · Cloud Edition <span id="sync-time"></span></footer>
+    </section>
+  </main>
+  <script>if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./assets/js/config.js"></script>
+  <script src="./assets/js/app.js"></script>
+</body>
+</html>
